@@ -73,3 +73,4 @@ schemars_derive = { git = 'https://github.com/tauri-apps/schemars.git', branch =
 tauri = { path = "./crates/tauri" }
 tauri-plugin = { path = "./crates/tauri-plugin" }
 tauri-utils = { path = "./crates/tauri-utils" }
+muda = { git = "https://github.com/tauri-apps/muda", branch = "chore/relax-objc2-dep-requirement" }

@@ -154,7 +154,7 @@ jni = "0.21"
 [target.'cfg(all(target_vendor = "apple", not(target_os = "macos")))'.dependencies]
 libc = "0.2"
 swift-rs = "1"
-objc2-ui-kit = { version = "0.3.0", default-features = false, features = [
+objc2-ui-kit = { version = "0.3", default-features = false, features = [
   "UIView",
 ] }
 

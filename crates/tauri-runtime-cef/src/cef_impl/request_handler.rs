@@ -23,9 +23,7 @@ use tauri_utils::{
 };
 use url::Url;
 
-use crate::cef_impl::Context;
-
-use super::CefInitScript;
+use crate::{webview::CefInitScript, CefRuntimeContext};
 
 fn csp_inject_initialization_scripts_hashes(
   existing_csp: String,
@@ -118,7 +116,7 @@ wrap_resource_request_handler! {
 }
 
 wrap_request_handler! {
-  pub struct WebRequestHandler {
+  pub struct CefWebRequestHandler {
     initialization_scripts: Arc<Vec<CefInitScript>>,
     navigation_handler: Option<Arc<tauri_runtime::webview::NavigationHandler>>,
   }
@@ -176,7 +174,7 @@ wrap_request_handler! {
 }
 
 wrap_resource_handler! {
-  pub struct WebResourceHandler {
+  pub struct CefWebResourceHandler {
     webview_label: String,
     handler: Arc<Box<UriSchemeProtocol>>,
     initialization_scripts: Arc<Vec<CefInitScript>>,
@@ -331,8 +329,8 @@ wrap_resource_handler! {
 }
 
 wrap_scheme_handler_factory! {
-  pub struct UriSchemeHandlerFactory<T: UserEvent> {
-    context: Context<T>,
+  pub struct CefUriSchemeHandlerFactory<T: UserEvent> {
+    context:CefRuntimeContext<T>,
     scheme: String,
   }
 
@@ -358,7 +356,7 @@ wrap_scheme_handler_factory! {
         })
       })?;
 
-      Some(WebResourceHandler::new(webview_label, handler, initialization_scripts, Arc::new(RefCell::new(None))))
+      Some(CefWebResourceHandler::new(webview_label, handler, initialization_scripts, Arc::new(RefCell::new(None))))
     }
   }
 }

@@ -6,7 +6,7 @@ use cef::{rc::*, *};
 use std::sync::{mpsc::Sender, Arc, Mutex};
 
 cef::wrap_cookie_visitor! {
-  pub struct CollectUrlCookiesVisitor {
+  pub struct CefCollectUrlCookiesVisitor {
     pub tx: Sender<tauri_runtime::Result<Vec<tauri_runtime::Cookie<'static>>>>,
     pub collected: Arc<Mutex<Vec<tauri_runtime::Cookie<'static>>>>,
   }
@@ -44,7 +44,7 @@ cef::wrap_cookie_visitor! {
 }
 
 cef::wrap_cookie_visitor! {
-  pub struct CollectAllCookiesVisitor {
+  pub struct CefCollectAllCookiesVisitor {
     pub tx: Sender<tauri_runtime::Result<Vec<tauri_runtime::Cookie<'static>>>>,
     pub collected: Arc<Mutex<Vec<tauri_runtime::Cookie<'static>>>>,
   }

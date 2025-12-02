@@ -12,7 +12,15 @@ fn read_to_string(path: &str) -> String {
 }
 
 fn main() {
-  tauri::Builder::default()
+  #[cfg(not(feature = "cef"))]
+  let builder = tauri::Builder::<tauri::Wry>::new();
+  #[cfg(feature = "cef")]
+  let builder = tauri::Builder::<tauri::Cef>::new().command_line_args(vec![(
+    "--use-mock-keychain".to_string(),
+    Option::<String>::None,
+  )]);
+
+  builder
     .setup(move |app| {
       let path = app
         .path()

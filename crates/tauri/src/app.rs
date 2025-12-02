@@ -2305,17 +2305,18 @@ tauri::Builder::default()
 
     #[cfg(desktop)]
     if let Some(menu) = self.menu {
-      let menu = menu(&app.handle)?;
-      app
-        .manager
-        .menu
-        .menus_stash_lock()
-        .insert(menu.id().clone(), menu.clone());
+      // TODO: figure out why this deadlocks
+      // let menu = menu(&app.handle)?;
+      // app
+      //   .manager
+      //   .menu
+      //   .menus_stash_lock()
+      //   .insert(menu.id().clone(), menu.clone());
 
-      #[cfg(target_os = "macos")]
-      init_app_menu(&menu)?;
+      // #[cfg(target_os = "macos")]
+      // init_app_menu(&menu)?;
 
-      app.manager.menu.menu_lock().replace(menu);
+      // app.manager.menu.menu_lock().replace(menu);
     }
 
     app.register_core_plugins()?;

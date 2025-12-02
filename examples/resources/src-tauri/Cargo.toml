@@ -5,6 +5,11 @@ description = "A Tauri application that uses Node.js with app resources"
 edition = "2021"
 rust-version = "1.77.2"
 
+[features]
+default = ["wry"]
+wry = ["tauri/wry"]
+cef = ["tauri/cef"]
+
 [build-dependencies]
 tauri-build = { path = "../../../crates/tauri-build", features = ["codegen"] }
 
