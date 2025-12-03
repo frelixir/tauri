@@ -1301,7 +1301,6 @@ fn on_window_destroyed<T: UserEvent>(
 
 pub fn handle_window_message<T: UserEvent>(
   context: &CefRuntimeContext<T>,
-  event_loop: &dyn winit::event_loop::ActiveEventLoop,
   window_id: WindowId,
   message: WindowMessage,
 ) {

@@ -926,7 +926,6 @@ fn get_webview<T: UserEvent>(
 
 pub fn handle_webview_message<T: UserEvent>(
   context: &CefRuntimeContext<T>,
-  event_loop: &dyn winit::event_loop::ActiveEventLoop,
   window_id: WindowId,
   webview_id: u32,
   message: WebviewMessage,

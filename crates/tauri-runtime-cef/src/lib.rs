@@ -56,7 +56,7 @@ pub type WebviewId = u32;
 #[macro_export]
 macro_rules! getter {
   ($self: ident, $rx: expr, $message: expr) => {{
-    $self.context.proxy.send_message($message)?;
+    crate::send_user_message(&$self.context, $message)?;
     $rx
       .recv()
       .map_err(|_| tauri_runtime::Error::FailedToReceiveMessage)
@@ -172,7 +172,7 @@ impl<T: UserEvent> ApplicationHandler for WinitApp<T> {
 
   fn proxy_wake_up(&mut self, event_loop: &dyn winit::event_loop::ActiveEventLoop) {
     while let Ok(message) = self.event_rx.try_recv() {
-      handle_message(&self.context, event_loop, message);
+      handle_message(&self.context, Some(event_loop), message);
     }
 
     cef::do_message_loop_work();
@@ -215,6 +215,7 @@ pub struct CefRuntimeContext<T: UserEvent> {
   pub next_webview_id: Arc<AtomicU32>,
   pub next_window_event_id: Arc<AtomicU32>,
   pub next_webview_event_id: Arc<AtomicU32>,
+  main_thread_id: ThreadId,
 }
 
 impl<T: UserEvent> std::fmt::Debug for CefRuntimeContext<T> {
@@ -233,6 +234,7 @@ impl<T: UserEvent> CefRuntimeContext<T> {
       next_webview_id: Arc::new(AtomicU32::new(1)),
       next_window_event_id: Arc::new(AtomicU32::new(1)),
       next_webview_event_id: Arc::new(AtomicU32::new(1)),
+      main_thread_id: thread::current().id(),
     }
   }
 
@@ -711,9 +713,25 @@ impl<T: UserEvent> tauri_runtime::EventLoopProxy<T> for EventLoopProxy<T> {
   }
 }
 
+/// Mirrors tauri-runtime-wry's send_user_message behavior: if we're already on the main
+/// thread, handle the message immediately; otherwise, post it to the main thread.
+pub(crate) fn send_user_message<T: UserEvent>(
+  context: &CefRuntimeContext<T>,
+  message: Message<T>,
+) -> Result<()> {
+  if thread::current().id() == context.main_thread_id {
+    // Already on main thread, execute directly
+    handle_message(context, None, message);
+    Ok(())
+  } else {
+    // Post to main thread via event loop proxy
+    context.proxy.send_message(message)
+  }
+}
+
 pub fn handle_message<T: UserEvent>(
   context: &CefRuntimeContext<T>,
-  event_loop: &dyn winit::event_loop::ActiveEventLoop,
+  event_loop: Option<&dyn winit::event_loop::ActiveEventLoop>,
   message: Message<T>,
 ) {
   match message {
@@ -722,7 +740,10 @@ pub fn handle_message<T: UserEvent>(
       webview_id,
       pending,
       after_window_creation: _todo,
-    } => create_window(context, event_loop, window_id, webview_id, pending),
+    } => {
+      let event_loop = event_loop.expect("CreateWindow must be handled through the event loop");
+      create_window(context, event_loop, window_id, webview_id, pending);
+    }
     Message::CreateWebview {
       window_id,
       webview_id,
@@ -735,13 +756,13 @@ pub fn handle_message<T: UserEvent>(
       pending,
     ),
     Message::Window { window_id, message } => {
-      handle_window_message(context, event_loop, window_id, message);
+      handle_window_message(context, window_id, message);
     }
     Message::Webview {
       window_id,
       webview_id,
       message,
-    } => handle_webview_message(context, event_loop, window_id, webview_id, message),
+    } => handle_webview_message(context, window_id, webview_id, message),
     Message::RequestExit(code) => {
       let (tx, rx) = channel();
       context.run_callback(RunEvent::ExitRequested {
