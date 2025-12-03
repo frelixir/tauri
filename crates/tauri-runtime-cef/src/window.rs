@@ -450,7 +450,6 @@ impl WindowBuilder for CefWindowBuilder {
     Ok(self)
   }
 
-  #[cfg(any(target_os = "macos", target_os = "ios", target_os = "android"))]
   fn skip_taskbar(self, _skip: bool) -> Self {
     self
   }
@@ -485,6 +484,17 @@ impl WindowBuilder for CefWindowBuilder {
     let parent = RawWindowHandle::AppKit(parent);
 
     self.attrs = unsafe { self.attrs.with_parent_window(Some(parent)) };
+    self
+  }
+
+  #[cfg(any(
+    target_os = "linux",
+    target_os = "dragonfly",
+    target_os = "freebsd",
+    target_os = "netbsd",
+    target_os = "openbsd"
+  ))]
+  fn transient_for(self, _parent: &impl gtk::glib::IsA<gtk::Window>) -> Self {
     self
   }
 
