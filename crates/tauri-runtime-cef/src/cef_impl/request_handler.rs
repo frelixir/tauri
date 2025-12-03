@@ -330,7 +330,7 @@ wrap_resource_handler! {
 
 wrap_scheme_handler_factory! {
   pub struct CefUriSchemeHandlerFactory<T: UserEvent> {
-    context:CefRuntimeContext<T>,
+    context: CefRuntimeContext<T>,
     scheme: String,
   }
 

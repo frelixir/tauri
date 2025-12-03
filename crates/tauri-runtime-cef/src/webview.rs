@@ -10,6 +10,7 @@ use tauri_runtime::{
   Cookie, Result, UserEvent, WebviewEventId,
 };
 
+use raw_window_handle::{HasWindowHandle, RawWindowHandle};
 #[cfg(target_os = "macos")]
 use tauri_utils::TitleBarStyle;
 use tauri_utils::{config::Color, html::normalize_script_for_csp};
@@ -668,28 +669,33 @@ pub(crate) fn create_webview<T: UserEvent>(
 
   let mut window_info = cef::WindowInfo::default();
 
-  #[cfg(target_os = "macos")]
-  {
-    use raw_window_handle::{HasWindowHandle, RawWindowHandle};
+  let Ok(handle) = window.window_handle() else {
+    return;
+  };
+  let handle = handle.as_raw();
 
-    let Ok(handle) = window.window_handle() else {
+  match handle {
+    #[cfg(target_os = "macos")]
+    RawWindowHandle::AppKit(handle) => {
+      window_info.parent_view = handle.ns_view.as_ptr();
+    }
+    #[cfg(target_os = "linux")]
+    RawWindowHandle::Xlib(handle) => {
+      window_info.parent_window = handle.window;
+    }
+    _ => {
       return;
-    };
-    let handle = handle.as_raw();
-    let RawWindowHandle::AppKit(handle) = handle else {
-      return;
-    };
-
-    let size = window.surface_size();
-
-    window_info.parent_view = handle.ns_view.as_ptr();
-    window_info.bounds = cef::Rect {
-      x: 0,
-      y: 0,
-      width: size.width as i32,
-      height: size.height as i32,
-    };
+    }
   }
+
+  let size = window.surface_size();
+
+  window_info.bounds = cef::Rect {
+    x: 0,
+    y: 0,
+    width: size.width as i32,
+    height: size.height as i32,
+  };
 
   let browser = browser_host_create_browser_sync(
     Some(&window_info),
@@ -700,6 +706,8 @@ pub(crate) fn create_webview<T: UserEvent>(
     request_context.as_mut(),
   )
   .expect("Failed to create browser view");
+
+  *browser_id.borrow_mut() = browser.identifier();
 
   context
     .windows
