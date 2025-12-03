@@ -179,6 +179,8 @@ pub struct CefWindowBuilder {
   pub macos_attrs: winit::platform::macos::WindowAttributesMacOS,
   pub browser_window: bool,
   pub center: bool,
+  #[cfg(windows)]
+  pub undecorated_shadow: bool,
 }
 
 impl CefWindowBuilder {
@@ -462,7 +464,7 @@ impl WindowBuilder for CefWindowBuilder {
   fn shadow(mut self, enable: bool) -> Self {
     #[cfg(windows)]
     {
-      self.attrs = self.attrs.with_undecorated_shadow(enable);
+      self.undecorated_shadow = enable;
     }
 
     #[cfg(target_os = "macos")]
@@ -472,6 +474,16 @@ impl WindowBuilder for CefWindowBuilder {
       self.attrs = self.attrs.with_platform_attributes(macos_attrs);
     }
 
+    self
+  }
+
+  #[cfg(windows)]
+  fn owner(self, owner: HWND) -> Self {
+    self
+  }
+
+  #[cfg(windows)]
+  fn parent(self, parent: HWND) -> Self {
     self
   }
 
@@ -495,6 +507,11 @@ impl WindowBuilder for CefWindowBuilder {
     target_os = "openbsd"
   ))]
   fn transient_for(self, _parent: &impl gtk::glib::IsA<gtk::Window>) -> Self {
+    self
+  }
+
+  #[cfg(windows)]
+  fn drag_and_drop(self, _enabled: bool) -> Self {
     self
   }
 
@@ -560,7 +577,6 @@ impl WindowBuilder for CefWindowBuilder {
     self
   }
 
-  #[cfg(not(windows))]
   fn window_classname<S: Into<String>>(self, _window_classname: S) -> Self {
     self
   }
@@ -1182,6 +1198,12 @@ pub(crate) fn create_window<T: UserEvent>(
   let window = event_loop
     .create_window(attributes.borrow().attrs.clone())
     .expect("failed to create window");
+
+  #[cfg(windows)]
+  if attributes.borrow().undecorated_shadow {
+    use winit::platform::windows::WindowExtWindows;
+    window.set_undecorated_shadow(true);
+  }
 
   context.windows.borrow_mut().insert(
     window_id,
