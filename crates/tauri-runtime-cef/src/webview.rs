@@ -674,10 +674,17 @@ pub(crate) fn create_webview<T: UserEvent>(
   };
   let handle = handle.as_raw();
 
+  // Set the parent window/view based on the platform
+  //
+  // This is same as WindowInfo::SetAsChild from CEF C++ API
+  // See macOS: https://github.com/chromiumembedded/cef/blob/9f7039413a3a95724e0e2de0dacb998a9a0963d5/include/internal/cef_mac.h#L90
+  // See Windows: https://github.com/chromiumembedded/cef/blob/9f7039413a3a95724e0e2de0dacb998a9a0963d5/include/internal/cef_win.h#L92
+  // See Linux: https://github.com/chromiumembedded/cef/blob/9f7039413a3a95724e0e2de0dacb998a9a0963d5/include/internal/cef_linux.h#L89
   match handle {
     #[cfg(target_os = "macos")]
     RawWindowHandle::AppKit(handle) => {
       window_info.parent_view = handle.ns_view.as_ptr();
+      window_info.hidden = 0;
     }
     #[cfg(target_os = "linux")]
     RawWindowHandle::Xlib(handle) => {
@@ -686,6 +693,8 @@ pub(crate) fn create_webview<T: UserEvent>(
     #[cfg(windows)]
     RawWindowHandle::Win32(handle) => {
       window_info.parent_window = sys::HWND(handle.hwnd.get() as _);
+      window_info.style =
+        (WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_TABSTOP | WS_VISIBLE).0;
     }
     _ => {
       return;
