@@ -80,12 +80,12 @@ pub struct WebviewBounds {
 
 #[derive(Clone)]
 pub struct Webview {
-  pub webview_id: u32,
+  pub webview_id: WebviewId,
   pub label: String,
   pub browser: Option<cef::Browser>,
   // browser_view.browser is null on the scheme handler factory,
   // so we need to use the browser_id to identify the browser
-  pub browser_id: Arc<RefCell<i32>>,
+  pub browser_id: i32,
   pub overlay: Option<cef::OverlayController>,
   pub bounds: Arc<Mutex<Option<WebviewBounds>>>,
   pub devtools_enabled: bool,
@@ -548,7 +548,7 @@ pub fn create_browser_window<T: UserEvent>(
       attributes: attributes.clone(),
       webviews: vec![Webview {
         webview_id,
-        browser_id: Arc::new(RefCell::new(browser.identifier())),
+        browser_id: browser.identifier(),
         label: webview_label,
         browser: None,
         overlay: None,
@@ -650,9 +650,7 @@ pub(crate) fn create_webview<T: UserEvent>(
     &initialization_scripts,
   );
 
-  let browser_id = Arc::new(RefCell::new(0));
   let mut browser_view_delegate = CefBrowserViewDelegate::new(
-    browser_id.clone(),
     platform_specific_attributes
       .iter()
       .find_map(|attr| match attr {
@@ -720,8 +718,6 @@ pub(crate) fn create_webview<T: UserEvent>(
   )
   .expect("Failed to create browser view");
 
-  *browser_id.borrow_mut() = browser.identifier();
-
   context
     .windows
     .borrow_mut()
@@ -731,8 +727,8 @@ pub(crate) fn create_webview<T: UserEvent>(
     .push(Webview {
       label,
       webview_id,
+      browser_id: browser.identifier(),
       browser: Some(browser),
-      browser_id,
       overlay: None,
       bounds: Arc::new(Mutex::new(None)),
       devtools_enabled,
