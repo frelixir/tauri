@@ -683,6 +683,10 @@ pub(crate) fn create_webview<T: UserEvent>(
     RawWindowHandle::Xlib(handle) => {
       window_info.parent_window = handle.window;
     }
+    #[cfg(windows)]
+    RawWindowHandle::Win32(handle) => {
+      window_info.parent_window = sys::HWND(handle.hwnd.get() as _);
+    }
     _ => {
       return;
     }
