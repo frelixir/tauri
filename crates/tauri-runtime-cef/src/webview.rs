@@ -539,6 +539,8 @@ pub fn create_browser_window<T: UserEvent>(
     return;
   };
 
+  do_message_loop_work();
+
   context.windows.borrow_mut().insert(
     window_id,
     crate::window::Window {
@@ -717,6 +719,8 @@ pub(crate) fn create_webview<T: UserEvent>(
     request_context.as_mut(),
   )
   .expect("Failed to create browser view");
+
+  do_message_loop_work();
 
   context
     .windows
