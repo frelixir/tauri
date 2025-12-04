@@ -692,6 +692,8 @@ pub(crate) fn create_webview<T: UserEvent>(
     }
     #[cfg(windows)]
     RawWindowHandle::Win32(handle) => {
+      use windows::Win32::UI::WindowsAndMessaging::*;
+
       window_info.parent_window = sys::HWND(handle.hwnd.get() as _);
       window_info.style =
         (WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_TABSTOP | WS_VISIBLE).0;
