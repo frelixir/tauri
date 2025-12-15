@@ -45,7 +45,7 @@ type CefOsEvent<'a> = *mut u8;
 type CefOsEvent<'a> = Option<&'a mut sys::MSG>;
 
 #[inline]
-fn color_to_cef_argb(color: tauri_utils::config::Color) -> u32 {
+pub(crate) fn color_to_cef_argb(color: tauri_utils::config::Color) -> u32 {
   let (r, g, b, a) = color.into();
   ((a as u32) << 24) | ((r as u32) << 16) | ((g as u32) << 8) | (b as u32)
 }
@@ -819,7 +819,6 @@ wrap_window_delegate! {
   impl WindowDelegate {
     fn on_window_created(&self, window: Option<&mut Window>) {
       if let Some(window) = window {
-
         // Setup necessary handling for `start_window_dragging` to work on Windows
         #[cfg(windows)]
         drag_window::windows::subclass_window_for_dragging(window);
@@ -919,6 +918,9 @@ wrap_window_delegate! {
 
         #[cfg(any(not(target_os = "macos"), feature = "macos-private-api"))]
         if a.transparent.unwrap_or_default() {
+          #[cfg(target_os = "macos")]
+          make_nswindow_transparent(window);
+
           window.set_background_color(0x00000000);
         }
 
@@ -1430,7 +1432,12 @@ fn handle_webview_message<T: UserEvent>(
       }
     }
     WebviewMessage::SetBackgroundColor(color) => {
-      let color_value = color_opt_to_cef_argb(color);
+      use tauri_utils::config::Color;
+
+      const WHITE: Color = Color(255, 255, 255, 255);
+
+      let color = color.unwrap_or(WHITE);
+
       if let Some(bv) = context
         .windows
         .borrow()
@@ -1442,7 +1449,7 @@ fn handle_webview_message<T: UserEvent>(
             .find(|w| w.webview_id == webview_id)
         })
       {
-        bv.inner.set_background_color(color_value)
+        bv.inner.set_background_color(color)
       }
     }
     WebviewMessage::ClearAllBrowsingData => {
@@ -2872,11 +2879,11 @@ pub(crate) fn create_webview<T: UserEvent>(
 
     #[cfg(any(not(target_os = "macos"), feature = "macos-private-api"))]
     if webview_attributes.transparent {
-      browser.set_background_color(0x00000000);
+      browser.set_background_color(tauri_utils::config::Color(0, 0, 0, 0));
     }
 
     if let Some(background_color) = webview_attributes.background_color {
-      browser.set_background_color(color_to_cef_argb(background_color));
+      browser.set_background_color(background_color);
     }
 
     let initial_bounds_ratio = if webview_attributes.auto_resize {
@@ -3141,4 +3148,26 @@ pub(crate) fn ensure_valid_content_view(
 
   // No replacement needed; return the original handle
   window_handle
+}
+
+#[cfg(target_os = "macos")]
+fn make_nswindow_transparent(window: &cef::Window) {
+  use objc2::rc::Retained;
+  use objc2_app_kit::{NSColor, NSView};
+
+  let handle = window.window_handle();
+
+  let nsview = unsafe { Retained::<NSView>::retain(handle as _) };
+  let Some(nsview) = nsview else {
+    return;
+  };
+
+  let Some(nswindow) = nsview.window() else {
+    return;
+  };
+
+  let clear_color = unsafe { NSColor::clearColor() };
+
+  nswindow.setOpaque(false);
+  nswindow.setBackgroundColor(Some(&clear_color));
 }

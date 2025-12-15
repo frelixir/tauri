@@ -1,5 +1,7 @@
 use cef::*;
 
+use crate::cef_impl::color_to_cef_argb;
+
 #[cfg(target_os = "macos")]
 mod macos;
 
@@ -58,9 +60,9 @@ impl CefWebview {
     }
   }
 
-  pub fn set_background_color(&self, color: cef::Color) {
+  pub fn set_background_color(&self, color: tauri_utils::config::Color) {
     match self {
-      CefWebview::BrowserView(view) => view.set_background_color(color),
+      CefWebview::BrowserView(view) => view.set_background_color(color_to_cef_argb(color)),
       CefWebview::Browser(browser) => browser.set_background_color(color),
     }
   }
@@ -91,7 +93,7 @@ trait CefBrowserExt {
   fn bounds(&self) -> cef::Rect;
   fn set_bounds(&self, rect: Option<&cef::Rect>);
   fn scale_factor(&self) -> f64;
-  fn set_background_color(&self, color: cef::Color);
+  fn set_background_color(&self, color: tauri_utils::config::Color);
   fn set_visible(&self, visible: i32);
   fn close(&self);
   fn set_parent(&self, parent: &cef::Window);

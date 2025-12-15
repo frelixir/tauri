@@ -72,7 +72,7 @@ impl CefBrowserExt for cef::Browser {
     dpi_to_scale_factor(dpi)
   }
 
-  fn set_background_color(&self, color: cef::Color) {
+  fn set_background_color(&self, color: tauri_utils::config::Color) {
     // TODO:
   }
 
