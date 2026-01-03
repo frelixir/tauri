@@ -1,5 +1,17 @@
 # Changelog
 
+## \[2.9.7]
+
+### Enhancements
+
+- [`2d28e3143`](https://www.github.com/tauri-apps/tauri/commit/2d28e3143ee3d97d7570ea03877aa00a0d6e47d0) ([#14632](https://www.github.com/tauri-apps/tauri/pull/14632) by [@sftse](https://www.github.com/tauri-apps/tauri/../../sftse)) Small code refactors for improved code readability. No user facing changes.
+- [`a2abe2e6b`](https://www.github.com/tauri-apps/tauri/commit/a2abe2e6bcb9e1eed8484240dfdb76a5bc28ae58) ([#14607](https://www.github.com/tauri-apps/tauri/pull/14607) by [@sftse](https://www.github.com/tauri-apps/tauri/../../sftse)) Simplified internal representation of `features: Option<Vec<String>>` with `Vec<String>`, no user facing changes
+
+### Dependencies
+
+- Upgraded to `tauri-utils@2.8.2`
+- Upgraded to `tauri-bundler@2.7.6`
+
 ## \[2.9.6]
 
 ### What's Changed

@@ -1,5 +1,19 @@
 # Changelog
 
+## \[2.9.6]
+
+### Bug Fixes
+
+- [`ff5d76ca2`](https://www.github.com/tauri-apps/tauri/commit/ff5d76ca214b94a7b6e88aa4f0f797bbf747824d) ([#14653](https://www.github.com/tauri-apps/tauri/pull/14653) by [@Legend-Master](https://www.github.com/tauri-apps/tauri/../../Legend-Master)) `WindowConfig::focus` is set to `false` in `WindowConfig::default()`
+
+### Dependencies
+
+- Upgraded to `tauri-utils@2.8.2`
+- Upgraded to `tauri-build@2.5.4`
+- Upgraded to `tauri-runtime-wry@2.9.4`
+- Upgraded to `tauri-runtime@2.9.3`
+- Upgraded to `tauri-macros@2.5.3`
+
 ## \[2.9.5]
 
 ### Bug Fixes

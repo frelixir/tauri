@@ -1,5 +1,17 @@
 # Changelog
 
+## \[2.9.4]
+
+### Bug Fixes
+
+- [`c1d82eb3a`](https://www.github.com/tauri-apps/tauri/commit/c1d82eb3a3fa4b555745ba699edf1cc532030117) ([#14628](https://www.github.com/tauri-apps/tauri/pull/14628) by [@KushalMeghani1644](https://www.github.com/tauri-apps/tauri/../../KushalMeghani1644)) On Linux, keep the WebContext alive to prevent zombie WebKit processes after repeatedly closing all windows and re-opening them.
+- [`9b242e40c`](https://www.github.com/tauri-apps/tauri/commit/9b242e40c844189c877a91e513ae6196202d5ae9) ([#14700](https://www.github.com/tauri-apps/tauri/pull/14700) by [@mewi99](https://www.github.com/tauri-apps/tauri/../../mewi99)) Fix compilation errors when targeting BSD.
+
+### Dependencies
+
+- Upgraded to `tauri-utils@2.8.2`
+- Upgraded to `tauri-runtime@2.9.3`
+
 ## \[2.9.3]
 
 ### Bug Fixes

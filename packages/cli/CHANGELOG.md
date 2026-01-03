@@ -1,5 +1,15 @@
 # Changelog
 
+## \[2.9.7]
+
+### Enhancements
+
+- [`a2abe2e6b`](https://www.github.com/tauri-apps/tauri/commit/a2abe2e6bcb9e1eed8484240dfdb76a5bc28ae58) ([#14607](https://www.github.com/tauri-apps/tauri/pull/14607) by [@sftse](https://www.github.com/tauri-apps/tauri/../../sftse)) Simplified internal representation of `features: Option<Vec<String>>` with `Vec<String>`, no user facing changes
+
+### Dependencies
+
+- Upgraded to `tauri-cli@2.9.7`
+
 ## \[2.9.6]
 
 ### Dependencies
